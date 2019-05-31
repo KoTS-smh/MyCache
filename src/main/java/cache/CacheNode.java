@@ -1,5 +1,6 @@
 package cache;
 
+import cache.utils.CurrentNanoTime;
 import lombok.Data;
 
 @Data
@@ -22,5 +23,10 @@ public class CacheNode {
         this.cacheData = data;
         this.timeout = timeout;
         this.lastRefreshTime = lastRefreshTime;
+    }
+
+    public boolean isTimeOut(){
+        long currentTime = CurrentNanoTime.INSTANCE.read();
+        return timeout != 0 && (timeout + lastRefreshTime) < currentTime;
     }
 }

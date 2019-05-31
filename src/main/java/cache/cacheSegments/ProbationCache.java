@@ -1,8 +1,8 @@
 package cache.cacheSegments;
 
 import cache.CacheNode;
-import cache.Exceptions.ExceptionCode;
-import cache.Exceptions.MyCacheException;
+import cache.exceptions.ExceptionCode;
+import cache.exceptions.MyCacheException;
 import cache.countMinSketch.FrequencySketch;
 import lombok.Data;
 
@@ -51,11 +51,11 @@ public class ProbationCache implements Cache,UpgradableCache{
     }
 
     @Override
-    public Object get(String key) {
+    public CacheNode get(String key) {
         if (!probationCache.containsKey(key)){
             return null;
         }
-        Object result = probationCache.get(key).getCacheData();
+        CacheNode result = probationCache.get(key);
         upgrade(key);
         return result;
     }

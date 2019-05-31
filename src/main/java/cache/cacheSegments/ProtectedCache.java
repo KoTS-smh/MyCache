@@ -1,8 +1,8 @@
 package cache.cacheSegments;
 
 import cache.CacheNode;
-import cache.Exceptions.ExceptionCode;
-import cache.Exceptions.MyCacheException;
+import cache.exceptions.ExceptionCode;
+import cache.exceptions.MyCacheException;
 import lombok.Data;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -47,13 +47,13 @@ public class ProtectedCache implements Cache,DegradableCache{
     }
 
     @Override
-    public Object get(String key) {
+    public CacheNode get(String key) {
         if (!protectedCache.containsKey(key)){
             return null;
         }
         CacheNode node = protectedCache.get(key);
         moveToHead(node);
-        return node.getCacheData();
+        return node;
     }
 
     @Override

@@ -1,11 +1,12 @@
 package cache;
 
-import cache.Exceptions.ExceptionCode;
-import cache.Exceptions.MyCacheException;
+import cache.exceptions.ExceptionCode;
+import cache.exceptions.MyCacheException;
 import cache.cacheSegments.EdenCache;
 import cache.cacheSegments.ProbationCache;
 import cache.cacheSegments.ProtectedCache;
 import cache.countMinSketch.FrequencySketch;
+import cache.utils.CurrentNanoTime;
 
 public class CacheManager implements ICacheManager {
 
@@ -25,30 +26,25 @@ public class CacheManager implements ICacheManager {
 
     @Override
     public void putCache(String key, Object cacheData) {
+        expireIfNeeded(key);
+        frequencySketch.increase(key);
         if (isHot(key)){
-            CacheNode cacheNode = new CacheNode(key,cacheData,0,System.currentTimeMillis());
-            edenCache.putCache(key,cacheNode);
-        }
-    }
-
-    @Override
-    public void putCache(String key, Object cacheData, long timeout) {
-        if (isHot(key)){
-            CacheNode cacheNode = new CacheNode(key,cacheData,timeout,System.currentTimeMillis());
+            CacheNode cacheNode = new CacheNode(key,cacheData,myCache.getTimeout(),CurrentNanoTime.INSTANCE.read());
             edenCache.putCache(key,cacheNode);
         }
     }
 
     @Override
     public Object getCache(String key) {
-        Object data= edenCache.get(key);
+        CacheNode data= edenCache.get(key);
         if (data == null)
             data = protectedCache.get(key);
         if (data == null)
             data = probationCache.get(key);
         if (data == null)
             throw new MyCacheException(ExceptionCode.CACHE_NOT_EXIST_ERROR);
-        return data;
+        frequencySketch.increase(key);
+        return data.getCacheData();
     }
 
     @Override
@@ -69,4 +65,16 @@ public class CacheManager implements ICacheManager {
         }
         return true;
     }
+
+    //惰性删除
+    private void expireIfNeeded(String key){
+        if (edenCache.contains(key) && edenCache.get(key).isTimeOut()) {
+            edenCache.remove(key);
+        }else if (protectedCache.contains(key) && protectedCache.get(key).isTimeOut()){
+            protectedCache.remove(key);
+        }else if (probationCache.contains(key) && probationCache.get(key).isTimeOut()){
+            probationCache.remove(key);
+        }
+    }
+
 }

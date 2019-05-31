@@ -1,8 +1,8 @@
 package cache.cacheSegments;
 
 import cache.CacheNode;
-import cache.Exceptions.ExceptionCode;
-import cache.Exceptions.MyCacheException;
+import cache.exceptions.ExceptionCode;
+import cache.exceptions.MyCacheException;
 import lombok.Data;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -48,11 +48,11 @@ public class EdenCache implements Cache,DegradableCache,UpgradableCache{
     }
 
     @Override
-    public Object get(String key) {
+    public CacheNode get(String key) {
         if (!edenCache.containsKey(key)){
             return null;
         }
-        Object result = edenCache.get(key).getCacheData();
+        CacheNode result = edenCache.get(key);
         upgrade(key);
         return result;
     }

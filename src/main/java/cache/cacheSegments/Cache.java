@@ -12,7 +12,7 @@ public interface Cache {
     /*
     缓存命中，获得对应value
      */
-    Object get(String key);
+    CacheNode get(String key);
 
     /*
     缓存命中，返回true

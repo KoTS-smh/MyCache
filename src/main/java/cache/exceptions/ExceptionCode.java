@@ -1,4 +1,4 @@
-package cache.Exceptions;
+package cache.exceptions;
 
 
 public enum ExceptionCode {
